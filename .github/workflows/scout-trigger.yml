@@ -1,0 +1,16 @@
+name: Trigger Scout Agent
+
+on:
+  schedule:
+    - cron: '0 */4 * * *'  # Runs every 4 hours
+  workflow_dispatch:      # Allows manual trigger from GitHub UI
+
+jobs:
+  trigger-scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call Scout API
+        run: |
+          curl -X POST ${{ secrets.VERCEL_APP_URL }}/api/scrape \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            -H "Content-Type: application/json"

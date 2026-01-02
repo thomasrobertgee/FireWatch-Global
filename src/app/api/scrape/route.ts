@@ -11,7 +11,7 @@ const supabaseAdmin = process.env.SUPABASE_SERVICE_ROLE_KEY
     )
     : null;
 
-export async function GET(request: Request) {
+export async function POST(request: Request) {
     // 1. Security Check
     const authHeader = request.headers.get('authorization');
     if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
