@@ -33,6 +33,7 @@ async function getDailyArticles() {
 
     // Helper to fetch one article by category
     const fetchOne = async (categories: string[]) => {
+        if (!supabase) return undefined;
         const { data } = await supabase
             .from('articles')
             .select('*')
