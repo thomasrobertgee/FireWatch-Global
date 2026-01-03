@@ -34,7 +34,9 @@ async function getArticles(category?: string): Promise<DBArticle[] | null> {
   return data as DBArticle[];
 }
 
-export default function Home() {
+import { Suspense } from 'react';
+
+function HomeContent() {
   const [articles, setArticles] = useState<DBArticle[] | null>(null);
   const [filterRegion, setFilterRegion] = useState<string>('All');
   const [error, setError] = useState<string | null>(null);
@@ -222,5 +224,13 @@ export default function Home() {
       </div>
       <NewsletterSignup />
     </main>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#f9fafb] animate-pulse" />}>
+      <HomeContent />
+    </Suspense>
   );
 }

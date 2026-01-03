@@ -1,11 +1,12 @@
 "use client";
 import { useState } from 'react';
+import { Suspense } from 'react';
 import { useSearchParams, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { Search, Flame } from 'lucide-react';
 import { SearchOverlay } from '@/components/SearchOverlay';
 
-export function Navbar() {
+function NavbarContent() {
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const searchParams = useSearchParams();
     const pathname = usePathname();
@@ -84,5 +85,13 @@ export function Navbar() {
                 </div>
             </div>
         </nav>
+    );
+}
+
+export function Navbar() {
+    return (
+        <Suspense fallback={<nav className="w-full border-b border-gray-200 bg-white sticky top-0 z-50 shadow-sm h-20" />}>
+            <NavbarContent />
+        </Suspense>
     );
 }
