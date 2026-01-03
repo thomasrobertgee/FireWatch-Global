@@ -50,6 +50,8 @@ export async function fetchHealthResearch() {
 export async function processHealthArticle(article: any) {
     initClients();
 
+    if (!supabase) throw new Error('Supabase client not initialized');
+
     // Check Dupes
     const { data: existing } = await supabase
         .from('articles')
