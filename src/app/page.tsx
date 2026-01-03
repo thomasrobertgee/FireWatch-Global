@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { ArticleCard } from '@/components/ArticleCard';
 import { Navbar } from '@/components/Navbar';
 import { Flame, Clock, ArrowUpRight } from 'lucide-react';
@@ -11,12 +12,20 @@ import { LiveTicker } from '@/components/LiveTicker';
 import { StationFeed } from '@/components/StationFeed';
 
 // Helper to fetch articles client-side (easier for dynamic updates/filtering demo)
-async function getArticles(): Promise<DBArticle[] | null> {
+// Helper to fetch articles client-side (easier for dynamic updates/filtering demo)
+async function getArticles(category?: string): Promise<DBArticle[] | null> {
   if (!supabase) return null;
-  const { data, error } = await supabase
+
+  let query = supabase
     .from('articles')
     .select('*')
     .order('created_at', { ascending: false });
+
+  if (category && category !== 'All') {
+    query = query.eq('category', category);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     console.error('Error fetching articles:', error);
@@ -30,9 +39,14 @@ export default function Home() {
   const [filterRegion, setFilterRegion] = useState<string>('All');
   const [error, setError] = useState<string | null>(null);
 
+  const searchParams = useSearchParams();
+  const categoryParams = searchParams.get('category');
+  const activeCategory = categoryParams || 'All';
+
   useEffect(() => {
     async function loadArticles() {
-      const data = await getArticles();
+      // Pass activeCategory if it's not 'All'
+      const data = await getArticles(activeCategory === 'All' ? undefined : activeCategory);
       if (data === null) {
         setError("Database connection not configured.");
       } else {
@@ -40,7 +54,7 @@ export default function Home() {
       }
     }
     loadArticles();
-  }, []);
+  }, [activeCategory]);
 
   // Unique regions from data or hardcoded
   const regions = ['All', 'Global', 'Australia/NZ', 'North America', 'Europe', 'Asia'];
