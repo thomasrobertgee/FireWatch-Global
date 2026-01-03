@@ -15,6 +15,7 @@ export interface DBArticle {
     created_at: string;
     title: string;
     slug?: string;
+    is_featured?: boolean;
     category: ArticleCategory;
     summary_bullets: string[]; // JSONB in DB, mapped to string[] here
     full_text?: string;

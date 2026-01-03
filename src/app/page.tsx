@@ -19,6 +19,7 @@ async function getArticles(category?: string): Promise<DBArticle[] | null> {
   let query = supabase
     .from('articles')
     .select('*')
+    .order('is_featured', { ascending: false })
     .order('created_at', { ascending: false });
 
   if (category && category !== 'All') {
