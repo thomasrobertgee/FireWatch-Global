@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { ArticleCard } from '@/components/ArticleCard';
 import { Navbar } from '@/components/Navbar';
-import { Flame, Clock } from 'lucide-react';
+import { Flame, Clock, ArrowUpRight } from 'lucide-react';
 import { supabase, DBArticle } from '@/lib/supabase';
 import { NewsletterSignup } from '@/components/NewsletterSignup';
 import { DailyIntelBar } from '@/components/DailyIntelBar';
@@ -105,67 +105,78 @@ export default function Home() {
             {/* Featured Headline */}
             {headlineArticle && (
               <section className="mb-12">
-                <div className="border border-gray-200 bg-white shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group flex flex-col md:flex-row min-h-[400px]">
-                  <div className="absolute top-0 left-0 w-1 h-full bg-signal-red z-20 md:block hidden"></div>
+                <a href={`/article/${headlineArticle.slug || headlineArticle.id}`} className="group block h-[500px] border border-gray-200 bg-white hover:border-signal-red transition-all duration-300 shadow-sm hover:shadow-md relative overflow-hidden">
+                  <div className="flex flex-col md:flex-row h-full">
 
-                  {/* Content Side */}
-                  <div className="flex-1 p-8 md:p-12 z-10 flex flex-col justify-center">
-                    <div className="flex items-center gap-3 mb-6">
-                      <span className="bg-signal-red text-white text-[10px] font-bold uppercase tracking-widest px-2 py-1">
-                        Top Story
-                      </span>
-                      <span className="text-gray-400 text-[10px] font-bold uppercase tracking-widest">
-                        {headlineArticle.category}
-                      </span>
-                      {headlineArticle.region && (
-                        <span className="text-gray-400 text-[10px] font-bold uppercase tracking-widest border-l pl-3 border-gray-200">
-                          {headlineArticle.region}
-                        </span>
+                    {/* Top Border Accent */}
+                    <div className="absolute top-0 left-0 w-1 h-full bg-signal-red z-20 md:block hidden"></div>
+
+                    {/* Content Side */}
+                    <div className="flex-1 flex flex-col z-10 h-full">
+
+                      {/* Top Half: Meta + Title */}
+                      <div className="flex-1 p-8 md:px-10 md:pt-10 md:pb-2 flex flex-col justify-start">
+                        <div className="flex items-center gap-3 mb-4">
+                          <span className="bg-signal-red text-white text-[10px] font-bold uppercase tracking-widest px-2 py-1">
+                            Top Story
+                          </span>
+                          <span className="text-gray-400 text-[10px] font-bold uppercase tracking-widest">
+                            {headlineArticle.category}
+                          </span>
+                          {headlineArticle.region && (
+                            <span className="text-gray-400 text-[10px] font-bold uppercase tracking-widest border-l pl-3 border-gray-200">
+                              {headlineArticle.region}
+                            </span>
+                          )}
+                        </div>
+
+                        <h1 className="font-heading text-2xl md:text-4xl font-bold text-gray-900 leading-tight group-hover:text-signal-red transition-colors line-clamp-3">
+                          {headlineArticle.title}
+                        </h1>
+                      </div>
+
+                      {/* Bottom Half: Summary + Footer */}
+                      <div className="flex-1 p-8 md:px-10 md:pb-10 md:pt-2 flex flex-col justify-end">
+                        <div className="space-y-3 mb-6 overflow-hidden">
+                          {headlineArticle.summary_bullets && headlineArticle.summary_bullets.map((point, i) => (
+                            <p key={i} className="text-gray-600 text-base leading-relaxed max-w-xl line-clamp-2">
+                              {(typeof point === 'string' ? point : Object.values(point || {}).join(' ')).replace(/^(The Situation|Professional Impact|Core Takeaway):/i, '').trim()}
+                            </p>
+                          ))}
+                        </div>
+
+                        <div className="flex items-center gap-6 mt-auto border-t border-gray-100 pt-6">
+                          <span className="text-signal-red font-bold uppercase tracking-widest text-sm group-hover:translate-x-1 transition-transform inline-flex items-center gap-2">
+                            Read Full Report <ArrowUpRight className="w-4 h-4" />
+                          </span>
+                          <div className="flex items-center gap-2 text-gray-400 text-[10px] font-bold uppercase tracking-widest ml-auto">
+                            <Clock className="w-3 h-3" />
+                            {new Date(headlineArticle.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Image Side - Fixed Height/Width or Ratio */}
+                    <div className="w-full md:w-[500px] bg-stone-200 relative min-h-[200px] md:h-full overflow-hidden">
+                      {headlineArticle.image_url ? (
+                        <img
+                          src={headlineArticle.image_url}
+                          alt={headlineArticle.title}
+                          className="w-full h-full object-cover absolute inset-0 group-hover:scale-105 transition-transform duration-700"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-stone-900 relative">
+                          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-stone-800 to-stone-950"></div>
+                          <span className="text-stone-700 font-bold uppercase tracking-[0.2em] text-sm relative z-10">FireWatch Global</span>
+                        </div>
                       )}
+                      {/* Overlay for aesthetic */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none"></div>
                     </div>
 
-                    <h1 className="font-heading text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight group-hover:text-gray-700 transition-colors">
-                      {headlineArticle.title}
-                    </h1>
-
-                    <div className="space-y-3 mb-8">
-                      {headlineArticle.summary_bullets && headlineArticle.summary_bullets.map((point, i) => (
-                        <p key={i} className="text-gray-600 text-lg leading-relaxed max-w-xl">
-                          {(typeof point === 'string' ? point : Object.values(point || {}).join(' ')).replace(/^(The Situation|Professional Impact|Core Takeaway):/i, '').trim()}
-                        </p>
-                      ))}
-                    </div>
-
-                    <div className="flex items-center gap-6 mt-auto">
-                      <a href={`/article/${headlineArticle.id}`} className="text-signal-red font-bold uppercase tracking-widest text-sm hover:underline">
-                        Read Full Report →
-                      </a>
-                      <div className="flex items-center gap-2 text-gray-400 text-[10px] font-bold uppercase tracking-widest">
-                        <Clock className="w-3 h-3" />
-                        {new Date(headlineArticle.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
-                      </div>
-                    </div>
                   </div>
-
-                  {/* Image Side */}
-                  <div className="w-full md:w-[500px] bg-stone-200 relative min-h-[250px] md:min-h-full">
-                    {headlineArticle.image_url ? (
-                      <img
-                        src={headlineArticle.image_url}
-                        alt={headlineArticle.title}
-                        className="w-full h-full object-cover absolute inset-0 group-hover:scale-105 transition-transform duration-700"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-stone-900 relative">
-                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-stone-800 to-stone-950"></div>
-                        <span className="text-stone-700 font-bold uppercase tracking-[0.2em] text-sm relative z-10">FireWatch Global</span>
-                      </div>
-                    )}
-                    {/* Subtle Gradient Overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none"></div>
-                  </div>
-
-                </div>
+                </a>
               </section>
             )}
 

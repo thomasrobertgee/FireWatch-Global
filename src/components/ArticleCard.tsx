@@ -15,7 +15,7 @@ export function ArticleCard({ article }: ArticleCardProps) {
     const timeStr = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
 
     return (
-        <Link href={`/article/${article.id}`} className="group block h-full">
+        <Link href={`/article/${article.slug || article.id}`} className="group block h-full">
             <div className="h-full border border-gray-200 bg-white hover:border-signal-red transition-all duration-300 flex flex-col justify-between relative shadow-sm hover:shadow-md overflow-hidden">
 
                 {/* Image Section */}

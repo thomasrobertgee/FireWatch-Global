@@ -2,6 +2,7 @@
 import NewsAPI from 'newsapi';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { supabase } from '@/lib/supabase';
+import { generateSlug } from '@/lib/slug';
 
 // Initialize clients lazily
 let newsapi: any;
@@ -166,8 +167,11 @@ export async function processAndSaveArticle(article: ScrapedArticle) {
         }
 
         // 3. Save to DB
+        const slug = generateSlug(article.title);
+
         const { error } = await supabase.from('articles').insert({
             title: article.title,
+            slug: slug,
             category: analysis.category,
             summary_bullets: analysis.summary_bullets,
             source_url: article.url,

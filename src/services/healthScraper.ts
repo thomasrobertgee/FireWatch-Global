@@ -2,6 +2,7 @@
 import NewsAPI from 'newsapi';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { supabase, DBArticle } from '@/lib/supabase';
+import { generateSlug } from '@/lib/slug';
 
 // Helper for PubMed (using standard newsapi for now as primary source due to env constraints, 
 // but queries will be highly scientific)
@@ -106,8 +107,11 @@ export async function processHealthArticle(article: any) {
             return;
         }
 
+        const slug = generateSlug(article.title);
+
         await supabase.from('articles').insert({
             title: article.title,
+            slug: slug,
             source_url: article.url,
             source_name: article.source,
             full_text: article.content,
