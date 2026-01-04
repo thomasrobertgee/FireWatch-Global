@@ -11,6 +11,7 @@ jobs:
     steps:
       - name: Call Scout API
         run: |
-          curl -X POST ${{ secrets.VERCEL_APP_URL }}/api/scrape \
+          curl -X POST https://fire-watch-global-l6dn.vercel.app/api/scrape \
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
-            -H "Content-Type: application/json"
+            -H "Content-Type: application/json" \
+            --connect-timeout 10 --max-time 30
