@@ -1,5 +1,14 @@
 // @ts-ignore
 import NewsAPI from 'newsapi';
+import fetch, { Headers, Request, Response } from 'node-fetch'; // Polyfill fetch for Node environment
+
+if (!globalThis.fetch) {
+    globalThis.fetch = fetch as any;
+    globalThis.Headers = Headers as any;
+    globalThis.Request = Request as any;
+    globalThis.Response = Response as any;
+}
+
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { supabase } from '@/lib/supabase';
 import { generateSlug } from '@/lib/slug';
@@ -62,7 +71,7 @@ export async function fetchFireNews(): Promise<ScrapedArticle[]> {
         });
 
         if (response.status !== 'ok') {
-            throw new Error(`NewsAPI Error: ${response.code}`);
+            throw new Error(`NewsAPI Error: ${response.code} `);
         }
 
         return response.articles.map((article: any) => ({
@@ -88,7 +97,7 @@ export async function processAndSaveArticle(article: ScrapedArticle) {
     // Check title and content for stronger filtering
     if (NEGATIVE_KEYWORDS.some(phrase => lowerTitle.includes(phrase) ||
         (phrase === 'political fire' && lowerContent.includes('political fire')))) {
-        console.log(`Skipping metaphorical/irrelevant article (Negative Keyword): ${article.title}`);
+        console.log(`Skipping metaphorical / irrelevant article(Negative Keyword): ${article.title} `);
         return;
     }
 
@@ -102,43 +111,43 @@ export async function processAndSaveArticle(article: ScrapedArticle) {
         .single();
 
     if (existing) {
-        console.log(`Skipping duplicate: ${article.title}`);
+        console.log(`Skipping duplicate: ${article.title} `);
         return;
     }
 
     // 2. AI Processing
-    console.log(`Processing with AI v2.0: ${article.title}`);
+    console.log(`Processing with AI v2.0: ${article.title} `);
 
     const prompt = `
     Analyze this news article for a professional fire service portal.
     
     Article Title: ${article.title}
-    Content/Snippet: ${article.content}
-    Source: ${article.source}
+Content / Snippet: ${article.content}
+Source: ${article.source}
 
-    Tasks:
-    1. RELEVANCE CHECK: Is this strictly about firefighting operations, professional welfare (cancer, unions, pay), innovation (tech, equipment), or major environment impact (bushfires)? 
-       - If NO (e.g. "under fire", political scandals, metaphorical usage), output "IRRELEVANT".
+Tasks:
+1. RELEVANCE CHECK: Is this strictly about firefighting operations, professional welfare(cancer, unions, pay), innovation(tech, equipment), or major environment impact(bushfires) ?
+    - If NO(e.g. "under fire", political scandals, metaphorical usage), output "IRRELEVANT".
        - Filter out ANY article that uses "fire" only as a metaphor.
     
     2. CATEGORIZE: Choose one: 'Operations', 'Welfare', 'Innovation', 'Environment'.
     
-    3. REGION: Identify the region. Choose one: 'Australia/NZ', 'North America', 'Europe', 'Asia', 'Global'.
+    3. REGION: Identify the region.Choose one: 'Australia/NZ', 'North America', 'Europe', 'Asia', 'Global'.
     
-    4. TAGS: Extract 3-5 short keywords (e.g., 'Wildfire', 'Legislation', 'Cancer Research', 'EV Safety').
+    4. TAGS: Extract 3 - 5 short keywords(e.g., 'Wildfire', 'Legislation', 'Cancer Research', 'EV Safety').
     
-    5. SUMMARIZE: Create exactly 3 high-quality bullet points with these headers: 'The Situation', 'Professional Impact', 'Core Takeaway'.
-       - Ensure the summary is transformative and adds value, not just copy-paste.
+    5. SUMMARIZE: Create exactly 3 high - quality bullet points with these headers: 'The Situation', 'Professional Impact', 'Core Takeaway'.
+       - Ensure the summary is transformative and adds value, not just copy - paste.
 
     Output JSON format only:
-    {
-      "relevant": boolean,
-      "category": string,
-      "region": string,
-      "tags": ["tag1", "tag2", "tag3"],
-      "summary_bullets": ["Point 1", "Point 2", "Point 3"]
-    }
-  `;
+{
+    "relevant": boolean,
+        "category": string,
+            "region": string,
+                "tags": ["tag1", "tag2", "tag3"],
+                    "summary_bullets": ["Point 1", "Point 2", "Point 3"]
+}
+`;
 
     try {
         // Use the requested model with thinking_level parameter (mapped to generationConfig or top level if applicable)
@@ -158,11 +167,11 @@ export async function processAndSaveArticle(article: ScrapedArticle) {
         const text = result.response.text();
 
         // Clean code blocks if any
-        const jsonStr = text.replace(/```json|```/g, '').trim();
+        const jsonStr = text.replace(/```json | ```/g, '').trim();
         const analysis = JSON.parse(jsonStr);
 
         if (!analysis.relevant) {
-            console.log(`Article filtered out as irrelevant (AI Decision): ${article.title}`);
+            console.log(`Article filtered out as irrelevant (AI Decision): ${article.title} `);
             return;
         }
 
@@ -183,7 +192,7 @@ export async function processAndSaveArticle(article: ScrapedArticle) {
         if (error) {
             console.error('Error inserting article:', error);
         } else {
-            console.log(`Saved: ${article.title}`);
+            console.log(`Saved: ${article.title} `);
         }
 
     } catch (error) {

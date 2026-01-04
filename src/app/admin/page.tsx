@@ -51,28 +51,29 @@ export default function AdminDashboard() {
 
     const handleDelete = async (id: string) => {
         if (!confirm('Are you sure you want to burn this record?')) return;
-        if (!supabase) return;
 
-        const { error } = await supabase.from('articles').delete().eq('id', id);
-        if (!error) {
+        const res = await fetch(`/api/admin/article/delete?id=${id}`, { method: 'DELETE' });
+        if (res.ok) {
             setArticles(articles.filter(a => a.id !== id));
         } else {
-            alert('Failed to delete: ' + error.message);
+            alert('Failed to delete');
         }
     };
 
     const toggleFeature = async (id: string, currentStatus: boolean) => {
-        if (!supabase) return;
+        // Optimistic UI Update
+        const newStatus = !currentStatus;
+        setArticles(articles.map(a => a.id === id ? { ...a, is_featured: newStatus } : a));
 
-        // If turning ON, ideally turn others OFF (optional, but requested "Manual pick which article stays at top")
-        // For now, toggle this one.
-        const { error } = await supabase
-            .from('articles')
-            .update({ is_featured: !currentStatus })
-            .eq('id', id);
+        const res = await fetch('/api/admin/article/toggle', {
+            method: 'POST',
+            body: JSON.stringify({ id, is_featured: newStatus })
+        });
 
-        if (!error) {
-            setArticles(articles.map(a => a.id === id ? { ...a, is_featured: !currentStatus } : a));
+        if (!res.ok) {
+            // Revert on failure
+            setArticles(articles.map(a => a.id === id ? { ...a, is_featured: currentStatus } : a));
+            alert('Failed to update feature status');
         }
     };
 

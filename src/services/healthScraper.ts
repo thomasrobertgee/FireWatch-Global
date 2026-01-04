@@ -1,5 +1,14 @@
 // @ts-ignore
 import NewsAPI from 'newsapi';
+import fetch, { Headers, Request, Response } from 'node-fetch'; // Polyfill fetch for Node environment
+
+if (!globalThis.fetch) {
+    globalThis.fetch = fetch as any;
+    globalThis.Headers = Headers as any;
+    globalThis.Request = Request as any;
+    globalThis.Response = Response as any;
+}
+
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { supabase, DBArticle } from '@/lib/supabase';
 import { generateSlug } from '@/lib/slug';
@@ -61,49 +70,49 @@ export async function processHealthArticle(article: any) {
         .single();
 
     if (existing) {
-        console.log(`Skipping duplicate study: ${article.title}`);
+        console.log(`Skipping duplicate study: ${article.title} `);
         return;
     }
 
-    console.log(`🧬 Analyzing Study: ${article.title}`);
+    console.log(`🧬 Analyzing Study: ${article.title} `);
 
     const prompt = `
-    You are a Medical Data Analyst. usage of "fire" as tags is forbidden unless it's literal fire.
-    
-    Article: ${article.title}
-    Content: ${article.content}
-    
-    Task:
-    1. VALIDATE: Is this article discussing actual research, studies, legislation about health, or medical findings regarding firefighters? 
-       - If it's just a general news story about a fire, output "IRRELEVANT".
-    
-    2. SUMMARIZE: Create exactly 3 bullet points with these EXACT headers:
-       - Methodology: (How was the data collected? or 'Analysis of...')
-       - Findings: (What are the medical facts?)
-       - Impact on Firefighters: (What does this mean for the profession?)
+    You are a Medical Data Analyst.usage of "fire" as tags is forbidden unless it's literal fire.
+
+Article: ${article.title}
+Content: ${article.content}
+
+Task:
+1. VALIDATE: Is this article discussing actual research, studies, legislation about health, or medical findings regarding firefighters ?
+    - If it's just a general news story about a fire, output "IRRELEVANT".
+
+2. SUMMARIZE: Create exactly 3 bullet points with these EXACT headers:
+- Methodology: (How was the data collected ? or 'Analysis of...')
+- Findings: (What are the medical facts ?)
+- Impact on Firefighters: (What does this mean for the profession ?)
 
     3. METADATA:
-       - Region: (Global, North America, etc.)
-       - Tags: 3 specific medical/scientific tags (e.g. PFAS, Carcinogens, Legislation).
+- Region: (Global, North America, etc.)
+- Tags: 3 specific medical / scientific tags(e.g.PFAS, Carcinogens, Legislation).
 
     Output JSON:
-    {
-      "relevant": boolean,
-      "summary_bullets": ["Methodology: ...", "Findings: ...", "Impact on Firefighters: ..."],
-      "region": string,
-      "tags": ["tag1", "tag2", "tag3"]
-    }
-    `;
+{
+    "relevant": boolean,
+        "summary_bullets": ["Methodology: ...", "Findings: ...", "Impact on Firefighters: ..."],
+            "region": string,
+                "tags": ["tag1", "tag2", "tag3"]
+}
+`;
 
     try {
         const result = await model.generateContent({
             contents: [{ role: 'user', parts: [{ text: prompt }] }]
         });
-        const text = result.response.text().replace(/```json|```/g, '').trim();
+        const text = result.response.text().replace(/```json | ```/g, '').trim();
         const analysis = JSON.parse(text);
 
         if (!analysis.relevant) {
-            console.log(`Filtered out as non-research: ${article.title}`);
+            console.log(`Filtered out as non - research: ${article.title} `);
             return;
         }
 
@@ -121,10 +130,10 @@ export async function processHealthArticle(article: any) {
             tags: analysis.tags
         });
 
-        console.log(`✅ Saved Health Ledger Entry: ${article.title}`);
+        console.log(`✅ Saved Health Ledger Entry: ${article.title} `);
 
     } catch (e) {
-        console.error(`Failed to process ${article.title}`, e);
+        console.error(`Failed to process ${article.title} `, e);
     }
 }
 
