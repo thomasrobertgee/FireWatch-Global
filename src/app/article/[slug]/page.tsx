@@ -2,6 +2,8 @@ import { Navbar } from '@/components/Navbar';
 import Link from 'next/link';
 import { ArrowLeft, ExternalLink, Clock, Calendar } from 'lucide-react';
 import { notFound } from 'next/navigation';
+import { LiveTicker } from '@/components/LiveTicker';
+import { DailyIntelBar } from '@/components/DailyIntelBar';
 import { supabase, DBArticle } from '@/lib/supabase';
 
 // Helper to fetch article (no-cache for freshness or simple cache)
@@ -35,7 +37,9 @@ export default async function ArticlePage({
 
     return (
         <main className="min-h-screen bg-white pb-20">
+            <LiveTicker />
             <Navbar />
+            <DailyIntelBar />
 
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 {/* 4. Navigation */}
