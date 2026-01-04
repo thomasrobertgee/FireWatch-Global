@@ -10,6 +10,7 @@ import { NewsletterSignup } from '@/components/NewsletterSignup';
 import { DailyIntelBar } from '@/components/DailyIntelBar';
 import { LiveTicker } from '@/components/LiveTicker';
 import { StationFeed } from '@/components/StationFeed';
+import { CategoryHeader } from '@/components/CategoryHeader';
 
 // Helper to fetch articles client-side (easier for dynamic updates/filtering demo)
 // Helper to fetch articles client-side (easier for dynamic updates/filtering demo)
@@ -94,6 +95,10 @@ function HomeContent() {
       <LiveTicker />
       <Navbar />
       <DailyIntelBar />
+
+      {['Operations', 'Welfare', 'Innovation', 'Environment'].includes(activeCategory) && (
+        <CategoryHeader category={activeCategory} />
+      )}
 
       <div className="container mx-auto px-4 py-8 max-w-7xl">
 

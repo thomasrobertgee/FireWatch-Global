@@ -4,7 +4,10 @@ import { useState, useEffect } from 'react';
 import { Navbar } from '@/components/Navbar';
 import { supabase, DBArticle } from '@/lib/supabase';
 import { FileText, Award, ExternalLink, Activity } from 'lucide-react';
+import { LiveTicker } from '@/components/LiveTicker';
+import { DailyIntelBar } from '@/components/DailyIntelBar';
 import { GlossaryText } from '@/components/GlossaryText';
+import { CategoryHeader } from '@/components/CategoryHeader';
 
 async function getHealthArticles(): Promise<DBArticle[] | null> {
     if (!supabase) return null;
@@ -37,21 +40,11 @@ export default function HealthLedger() {
 
     return (
         <main className="min-h-screen bg-stone-50 font-serif text-stone-900">
+            <LiveTicker />
             <Navbar />
+            <DailyIntelBar />
 
-            <header className="bg-white border-b border-stone-200 py-16">
-                <div className="container mx-auto px-4 max-w-4xl text-center">
-                    <div className="flex justify-center mb-4">
-                        <Activity className="w-12 h-12 text-emerald-700" />
-                    </div>
-                    <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-stone-900 mb-4 font-heading">
-                        The Health Ledger
-                    </h1>
-                    <p className="text-lg text-stone-600 italic">
-                        "Occupational risks, peer-reviewed findings, and long-term welfare analysis."
-                    </p>
-                </div>
-            </header>
+            <CategoryHeader category="Health Ledger" />
 
             <div className="container mx-auto px-4 py-12 max-w-3xl">
                 {articles.length === 0 ? (
