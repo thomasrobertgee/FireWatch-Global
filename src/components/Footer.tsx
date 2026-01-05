@@ -48,7 +48,8 @@ export function Footer() {
                         <h4 className="font-bold text-white uppercase tracking-widest text-xs mb-6">Legal & Support</h4>
                         <ul className="space-y-4 text-sm text-stone-400">
                             <li><Link href="/legal/terms" className="hover:text-white transition-colors">Terms of Service</Link></li>
-                            <li><Link href="/legal/terms" className="hover:text-white transition-colors">Privacy Policy</Link></li>
+                            <li><Link href="/legal/privacy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
+                            <li><Link href="/legal/cookies" className="hover:text-white transition-colors">Cookie Policy</Link></li>
                             <li><Link href="/legal/terms" className="hover:text-white transition-colors">Copyright & DMCA</Link></li>
                             <li><a href="mailto:legal@firewatch.global" className="hover:text-white transition-colors">Report Issue</a></li>
                         </ul>

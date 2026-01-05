@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Merriweather } from "next/font/google"; // Import fonts
+import { CookieBanner } from "@/components/CookieBanner";
 import "./globals.css";
 
 const inter = Inter({
@@ -31,6 +32,7 @@ export default function RootLayout({
         className={`${inter.variable} ${merriweather.variable} antialiased bg-gray-50 text-gray-900`}
       >
         {children}
+        <CookieBanner />
       </body>
     </html>
   );
