@@ -9,7 +9,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 const genAI = process.env.GEMINI_API_KEY ? new GoogleGenerativeAI(process.env.GEMINI_API_KEY) : null;
 
-async function generateIntro(): Promise<string> {
+export async function generateIntro(): Promise<string> {
     if (!genAI) return "Stay safe on your shift.";
 
     try {
@@ -24,7 +24,7 @@ async function generateIntro(): Promise<string> {
     }
 }
 
-async function getDailyArticles() {
+export async function getDailyArticles() {
     if (!supabase) return [];
 
     const yesterday = new Date();
@@ -53,7 +53,7 @@ async function getDailyArticles() {
 
 
 // Raw HTML Template Generator to bypass React-Email compilation issues
-function generateEmailHtml(intro: string, articles: DBArticle[]) {
+export function generateEmailHtml(intro: string, articles: DBArticle[]) {
     const articleHtml = articles.map(a => `
         <div style="margin-bottom: 24px;">
             <p style="color: #9ca3af; font-size: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.1em; margin: 0;">
