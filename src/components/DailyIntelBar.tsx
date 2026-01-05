@@ -24,11 +24,12 @@ export function DailyIntelBar() {
             const dateStr = yesterday.toISOString();
 
             // Parallel fetch
-            const [totalRes, healthRes, activeRes, lastSyncRes] = await Promise.all([
+            const [totalRes, healthRes, activeRes, lastSyncRes, scoutStatusRes] = await Promise.all([
                 supabase.from('articles').select('*', { count: 'exact', head: true }).gte('created_at', dateStr),
                 supabase.from('articles').select('*', { count: 'exact', head: true }).eq('category', 'Health_Research').gte('created_at', dateStr),
                 supabase.from('articles').select('region').gte('created_at', dateStr),
-                supabase.from('articles').select('created_at').order('created_at', { ascending: false }).limit(1)
+                supabase.from('articles').select('created_at').order('created_at', { ascending: false }).limit(1),
+                supabase.from('scout_status').select('last_run_at').order('last_run_at', { ascending: false }).limit(1)
             ]);
 
             let activeZone = 'Global';
@@ -41,11 +42,19 @@ export function DailyIntelBar() {
                 activeZone = Object.entries(counts).reduce((a, b) => a[1] > b[1] ? a : b)[0];
             }
 
+            // Determine Last Sync (prefer scout_status, fallback to latest article)
+            let lastSyncDate = null;
+            if (scoutStatusRes.data && scoutStatusRes.data[0]) {
+                lastSyncDate = new Date(scoutStatusRes.data[0].last_run_at);
+            } else if (lastSyncRes.data && lastSyncRes.data[0]) {
+                lastSyncDate = new Date(lastSyncRes.data[0].created_at);
+            }
+
             setStats({
                 total24h: totalRes.count || 0,
                 health24h: healthRes.count || 0,
                 activeZone,
-                lastSync: lastSyncRes.data && lastSyncRes.data[0] ? new Date(lastSyncRes.data[0].created_at) : null
+                lastSync: lastSyncDate
             });
         }
         fetchStats();
