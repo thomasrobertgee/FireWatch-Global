@@ -20,7 +20,7 @@ export async function generateIntro(): Promise<string> {
         return result.response.text().trim();
     } catch (e) {
         console.error("AI Intro Gen Failed:", e);
-        return "Stay safe on your shift. Watch out for each other.";
+        return "Shift change. Briefing attached.";
     }
 }
 
@@ -63,7 +63,7 @@ export function generateEmailHtml(intro: string, articles: DBArticle[]) {
                 ${a.title}
             </a>
             <p style="color: #4b5563; font-size: 14px; line-height: 24px; margin: 0;">
-                ${a.summary_bullets?.[0] || "No summary available."}
+                ${a.card_summary || a.summary_bullets?.[0] || "No summary available."}
             </p>
         </div>
     `).join('');
@@ -99,7 +99,7 @@ export function generateEmailHtml(intro: string, articles: DBArticle[]) {
 
             <!-- Briefings -->
             <h2 style="color: #000000; font-size: 18px; font-weight: bold; margin: 30px 0; text-transform: uppercase; letter-spacing: 0.1em;">
-                Top 3 Briefings
+                Top Briefings
             </h2>
 
             ${articles.length > 0 ? articleHtml : '<p style="color: #6b7280;">No major briefings for this shift.</p>'}
@@ -108,14 +108,14 @@ export function generateEmailHtml(intro: string, articles: DBArticle[]) {
 
             <!-- CTA -->
             <div style="text-align: center; margin: 32px 0;">
-                <a href="http://localhost:3000/health-ledger" style="background-color: #10b981; border-radius: 4px; color: #ffffff; font-size: 12px; font-weight: bold; text-decoration: none; padding: 12px 20px; text-transform: uppercase; letter-spacing: 0.1em; display: inline-block;">
-                    View Health Ledger
+                <a href="http://localhost:3000/" style="background-color: #000000; border-radius: 4px; color: #ffffff; font-size: 12px; font-weight: bold; text-decoration: none; padding: 12px 20px; text-transform: uppercase; letter-spacing: 0.1em; display: inline-block;">
+                    View Command Center
                 </a>
             </div>
 
             <div style="text-align: center; margin-top: 32px; border-top: 1px solid #e5e7eb; padding-top: 24px;">
                 <p style="color: #6b7280; font-size: 11px; margin-bottom: 8px;">
-                    © 2026 FireWatch Global. Stay Safe.
+                    © 2026 FireWatch Global. All rights reserved.
                 </p>
                 <p style="font-size: 11px; color: #9ca3af;">
                     You received this email because you signed up for our daily briefing.
