@@ -2,16 +2,18 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Activity, Thermometer, ShieldAlert } from 'lucide-react';
+import { Activity, Thermometer, ShieldAlert, Radio } from 'lucide-react';
 
 interface IntelStats {
     total24h: number;
     health24h: number;
     activeZone: string;
+    lastSync: Date | null;
 }
 
 export function DailyIntelBar() {
     const [stats, setStats] = useState<IntelStats | null>(null);
+    const [timeDisplay, setTimeDisplay] = useState("SYNCING...");
 
     useEffect(() => {
         async function fetchStats() {
@@ -22,10 +24,11 @@ export function DailyIntelBar() {
             const dateStr = yesterday.toISOString();
 
             // Parallel fetch
-            const [totalRes, healthRes, activeRes] = await Promise.all([
+            const [totalRes, healthRes, activeRes, lastSyncRes] = await Promise.all([
                 supabase.from('articles').select('*', { count: 'exact', head: true }).gte('created_at', dateStr),
                 supabase.from('articles').select('*', { count: 'exact', head: true }).eq('category', 'Health_Research').gte('created_at', dateStr),
-                supabase.from('articles').select('region').gte('created_at', dateStr)
+                supabase.from('articles').select('region').gte('created_at', dateStr),
+                supabase.from('articles').select('created_at').order('created_at', { ascending: false }).limit(1)
             ]);
 
             let activeZone = 'Global';
@@ -41,31 +44,72 @@ export function DailyIntelBar() {
             setStats({
                 total24h: totalRes.count || 0,
                 health24h: healthRes.count || 0,
-                activeZone
+                activeZone,
+                lastSync: lastSyncRes.data && lastSyncRes.data[0] ? new Date(lastSyncRes.data[0].created_at) : null
             });
         }
         fetchStats();
     }, []);
 
-    if (!stats) return <div className="h-12 bg-stone-100 border-b border-gray-200 animate-pulse" />;
+    // Time Ago Logic
+    useEffect(() => {
+        if (!stats?.lastSync) return;
+
+        const updateTime = () => {
+            const now = new Date();
+            const diffMs = now.getTime() - stats.lastSync!.getTime();
+            const diffMins = Math.floor(diffMs / 60000);
+
+            if (diffMins < 1) {
+                setTimeDisplay("JUST NOW");
+            } else if (diffMins < 60) {
+                setTimeDisplay(`${diffMins}M AGO`);
+            } else {
+                const hours = Math.floor(diffMins / 60);
+                const mins = diffMins % 60;
+                setTimeDisplay(`${hours}H ${mins}M AGO`);
+            }
+        };
+
+        updateTime();
+        const interval = setInterval(updateTime, 60000);
+        return () => clearInterval(interval);
+    }, [stats?.lastSync]);
+
+    if (!stats) return <div className="h-10 bg-stone-900 border-b border-signal-red animate-pulse" />;
 
     return (
-        <div className="bg-stone-900 border-b border-signal-red text-white py-3">
-            <div className="container mx-auto px-4 flex flex-wrap justify-center md:justify-around gap-4 md:gap-8 text-sm uppercase tracking-widest font-bold">
+        <div className="bg-stone-950 border-b border-signal-red text-white py-2">
+            <div className="container mx-auto px-4 flex flex-wrap justify-between md:justify-center md:gap-8 gap-x-4 gap-y-2 text-[10px] md:text-xs uppercase tracking-widest font-bold">
 
-                <div className="flex items-center gap-2">
-                    <Activity className="w-4 h-4 text-signal-red" />
-                    <span>{stats.total24h} New Reports (24h)</span>
+                {/* Scout Status & Sync */}
+                <div className="flex items-center gap-2 text-emerald-500">
+                    <span className="relative flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                    </span>
+                    <span className="hidden md:inline">SCOUT ACTIVE</span>
+                    <span className="text-stone-600">|</span>
+                    <span className="text-stone-400">SYNC: <span className="text-white">{timeDisplay}</span></span>
                 </div>
 
+                {/* Reports */} // Hidden on very small screens if needed, but keeping for now
                 <div className="flex items-center gap-2">
-                    <ShieldAlert className="w-4 h-4 text-amber-500" />
-                    <span>Active Zone: <span className="text-white">{stats.activeZone}</span></span>
+                    <Activity className="w-3 h-3 text-signal-red" />
+                    <span>{stats.total24h} <span className="hidden sm:inline">REPORTS</span></span>
                 </div>
 
+                {/* Zone */}
                 <div className="flex items-center gap-2">
-                    <Thermometer className="w-4 h-4 text-emerald-500" />
-                    <span>{stats.health24h} Health Studies</span>
+                    <ShieldAlert className="w-3 h-3 text-amber-500" />
+                    <span className="hidden sm:inline">ZONE:</span>
+                    <span className="text-white">{stats.activeZone}</span>
+                </div>
+
+                {/* Health */}
+                <div className="flex items-center gap-2">
+                    <Thermometer className="w-3 h-3 text-emerald-500" />
+                    <span>{stats.health24h} <span className="hidden sm:inline">HEALTH</span></span>
                 </div>
 
             </div>

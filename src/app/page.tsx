@@ -8,7 +8,6 @@ import { Flame, Clock, ArrowUpRight } from 'lucide-react';
 import { supabase, DBArticle } from '@/lib/supabase';
 import { NewsletterSignup } from '@/components/NewsletterSignup';
 import { DailyIntelBar } from '@/components/DailyIntelBar';
-import { LiveTicker } from '@/components/LiveTicker';
 import { StationFeed } from '@/components/StationFeed';
 import { CategoryHeader } from '@/components/CategoryHeader';
 
@@ -92,7 +91,6 @@ function HomeContent() {
 
   return (
     <main className="min-h-screen bg-[#f9fafb]">
-      <LiveTicker />
       <Navbar />
       <DailyIntelBar />
 

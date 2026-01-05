@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { Navbar } from '@/components/Navbar';
 import { supabase, DBArticle } from '@/lib/supabase';
 import { FileText, Award, ExternalLink, Activity } from 'lucide-react';
-import { LiveTicker } from '@/components/LiveTicker';
 import { DailyIntelBar } from '@/components/DailyIntelBar';
 import { GlossaryText } from '@/components/GlossaryText';
 import { CategoryHeader } from '@/components/CategoryHeader';
@@ -40,7 +39,6 @@ export default function HealthLedger() {
 
     return (
         <main className="min-h-screen bg-stone-50 font-serif text-stone-900">
-            <LiveTicker />
             <Navbar />
             <DailyIntelBar />
 
