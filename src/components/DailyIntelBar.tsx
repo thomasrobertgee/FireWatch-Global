@@ -93,7 +93,7 @@ export function DailyIntelBar() {
                     <span className="text-stone-400">SYNC: <span className="text-white">{timeDisplay}</span></span>
                 </div>
 
-                {/* Reports */} // Hidden on very small screens if needed, but keeping for now
+                {/* Reports */}
                 <div className="flex items-center gap-2">
                     <Activity className="w-3 h-3 text-signal-red" />
                     <span>{stats.total24h} <span className="hidden sm:inline">REPORTS</span></span>
