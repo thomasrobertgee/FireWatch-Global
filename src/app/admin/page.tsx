@@ -1,8 +1,9 @@
 "use client";
 import { useEffect, useState } from 'react';
 import { supabase, DBArticle } from '@/lib/supabase';
-import { Flame, Users, Radio, Trash2, Star, Play, AlertTriangle, Loader2 } from 'lucide-react';
+import { Flame, Users, Radio, Trash2, Star, Play, AlertTriangle, Loader2, Activity, Mail } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { checkSystemHealth } from '@/lib/watchdog';
 
 interface Subscriber {
     id: string;
@@ -16,6 +17,9 @@ export default function AdminDashboard() {
     const [loading, setLoading] = useState(true);
     const [scraping, setScraping] = useState(false);
     const [scrapeStatus, setScrapeStatus] = useState<string | null>(null);
+    const [systemHealth, setSystemHealth] = useState<'healthy' | 'unhealthy' | 'error' | null>(null);
+    const [loadingHealth, setLoadingHealth] = useState(true);
+    const [lastNewsletter, setLastNewsletter] = useState<string | null>(null);
 
     const router = useRouter();
 
@@ -41,6 +45,22 @@ export default function AdminDashboard() {
             .select('*');
 
         if (subData) setSubscribers(subData);
+
+        // Fetch Diagnostics
+        const health = await checkSystemHealth();
+        setSystemHealth(health.status as any);
+        setLoadingHealth(false);
+
+        const { data: logData } = await supabase
+            .from('newsletter_logs')
+            .select('sent_at')
+            .eq('status', 'success')
+            .order('sent_at', { ascending: false })
+            .limit(1);
+
+        if (logData && logData.length > 0) {
+            setLastNewsletter(logData[0].sent_at);
+        }
 
         setLoading(false);
     };
@@ -128,23 +148,31 @@ export default function AdminDashboard() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
 
                 {/* Stat 1 */}
-                <div className="bg-zinc-900 border border-zinc-800 p-6 rounded-sm">
+                <div className={`border p-6 rounded-sm ${systemHealth === 'healthy' ? 'bg-zinc-900 border-zinc-800' : 'bg-red-950/20 border-red-900/50'}`}>
                     <div className="flex justify-between items-start mb-4">
-                        <h3 className="font-mono text-zinc-500 text-xs uppercase tracking-widest">Total Intelligence</h3>
-                        <Radio className="w-4 h-4 text-emerald-500" />
+                        <h3 className="font-mono text-zinc-500 text-xs uppercase tracking-widest">System Health</h3>
+                        <Activity className={`w-4 h-4 ${systemHealth === 'healthy' ? 'text-emerald-500' : 'text-red-500 animate-pulse'}`} />
                     </div>
-                    <div className="text-4xl font-mono text-zinc-100">{articles.length}</div>
-                    <div className="text-xs font-mono text-zinc-600 mt-2">Cached Articles</div>
+                    <div className={`text-2xl font-mono ${systemHealth === 'healthy' ? 'text-emerald-400' : 'text-red-400'}`}>
+                        {systemHealth === 'healthy' ? 'OPERATIONAL' : 'DEGRADED'}
+                    </div>
+                    <div className="text-xs font-mono text-zinc-600 mt-2">
+                        {loadingHealth ? 'Running diagnostics...' : systemHealth === 'healthy' ? 'All systems nominal.' : 'Check watchdog logs.'}
+                    </div>
                 </div>
 
                 {/* Stat 2 */}
                 <div className="bg-zinc-900 border border-zinc-800 p-6 rounded-sm">
                     <div className="flex justify-between items-start mb-4">
-                        <h3 className="font-mono text-zinc-500 text-xs uppercase tracking-widest">Subscribers</h3>
-                        <Users className="w-4 h-4 text-blue-500" />
+                        <h3 className="font-mono text-zinc-500 text-xs uppercase tracking-widest">Last Newsletter</h3>
+                        <Mail className="w-4 h-4 text-blue-500" />
                     </div>
-                    <div className="text-4xl font-mono text-zinc-100">{subscribers.length}</div>
-                    <div className="text-xs font-mono text-zinc-600 mt-2">Active Recipients</div>
+                    <div className="text-xl font-mono text-zinc-100">
+                        {lastNewsletter ? new Date(lastNewsletter).toLocaleDateString() : 'N/A'}
+                    </div>
+                    <div className="text-xs font-mono text-zinc-600 mt-2">
+                        {lastNewsletter ? `${Math.floor((Date.now() - new Date(lastNewsletter).getTime()) / (1000 * 60 * 60))} hours ago` : 'No data found'}
+                    </div>
                 </div>
 
                 {/* Actions */}
