@@ -4,6 +4,7 @@ import { ArrowLeft, ExternalLink, Clock, Calendar } from 'lucide-react';
 import { notFound } from 'next/navigation';
 import { DailyIntelBar } from '@/components/DailyIntelBar';
 import { supabase, DBArticle } from '@/lib/supabase';
+import { Footer } from '@/components/Footer';
 
 // Helper to fetch article (no-cache for freshness or simple cache)
 async function getArticle(slug: string): Promise<DBArticle | null> {
@@ -140,10 +141,18 @@ export default async function ArticlePage({
                                 <ExternalLink className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                             </a>
                         </div>
+
+                        {/* Takedown Request */}
+                        <div className="mt-12 text-center border-t border-gray-50 pt-8">
+                            <a href={`mailto:legal@firewatch.global?subject=Takedown Request: ${article.title}`} className="text-gray-400 text-xs hover:text-signal-red transition-colors uppercase tracking-widest font-bold">
+                                Report an Issue / Takedown Request
+                            </a>
+                        </div>
                     </div>
 
                 </article>
             </div>
+            <Footer />
         </main>
     );
 }

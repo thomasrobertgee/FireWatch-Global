@@ -10,6 +10,7 @@ import { NewsletterSignup } from '@/components/NewsletterSignup';
 import { DailyIntelBar } from '@/components/DailyIntelBar';
 import { StationFeed } from '@/components/StationFeed';
 import { CategoryHeader } from '@/components/CategoryHeader';
+import { Footer } from '@/components/Footer';
 
 // Helper to fetch articles client-side (easier for dynamic updates/filtering demo)
 // Helper to fetch articles client-side (easier for dynamic updates/filtering demo)
@@ -227,6 +228,7 @@ function HomeContent() {
         </div>
       </div>
       <NewsletterSignup />
+      <Footer />
     </main>
   );
 }

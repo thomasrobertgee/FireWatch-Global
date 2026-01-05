@@ -7,6 +7,7 @@ import { FileText, Award, ExternalLink, Activity } from 'lucide-react';
 import { DailyIntelBar } from '@/components/DailyIntelBar';
 import { GlossaryText } from '@/components/GlossaryText';
 import { CategoryHeader } from '@/components/CategoryHeader';
+import { Footer } from '@/components/Footer';
 
 async function getHealthArticles(): Promise<DBArticle[] | null> {
     if (!supabase) return null;
@@ -110,6 +111,7 @@ export default function HealthLedger() {
                     </div>
                 )}
             </div>
+            <Footer />
         </main>
     );
 }
