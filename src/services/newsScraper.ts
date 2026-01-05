@@ -167,11 +167,19 @@ Tasks:
         const text = result.response.text();
 
         // Clean code blocks if any
-        const jsonStr = text.replace(/```json | ```/g, '').trim();
+        // Clean code blocks if any (handle ```json, ```, and potential newlines)
+        const jsonStr = text.replace(/```json/gi, '').replace(/```/g, '').trim();
+
+        // Handle text-only rejection
+        if (jsonStr.includes("IRRELEVANT")) {
+            console.log(`Article filtered out as irrelevant (AI Decision - Text): ${article.title}`);
+            return;
+        }
+
         const analysis = JSON.parse(jsonStr);
 
         if (!analysis.relevant) {
-            console.log(`Article filtered out as irrelevant (AI Decision): ${article.title} `);
+            console.log(`Article filtered out as irrelevant (AI Decision - JSON): ${article.title}`);
             return;
         }
 
