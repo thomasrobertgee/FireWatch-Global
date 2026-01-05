@@ -2,8 +2,9 @@ name: Trigger Scout Agent
 
 on:
   schedule:
-    - cron: '0 */4 * * *'  # Runs every 4 hours
-  workflow_dispatch:      # Allows manual trigger from GitHub UI
+    - cron: '0 */4 * * *'  # Runs every 4 hours (Scout)
+    - cron: '0 20 * * *'   # Runs at 20:00 UTC / 07:00 AEDT (Newsletter)
+  workflow_dispatch:       # Allows manual trigger from GitHub UI
 
 jobs:
   trigger-scrape:
@@ -15,3 +16,10 @@ jobs:
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
             -H "Content-Type: application/json" \
             --connect-timeout 10 --max-time 30
+
+      - name: Trigger Daily Newsletter
+        if: github.event_name == 'workflow_dispatch' || (github.event.schedule == '0 20 * * *')
+        run: |
+          curl -X GET https://fire-watch-global-l6dn.vercel.app/api/newsletter/send \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            --connect-timeout 10 --max-time 300
