@@ -13,18 +13,26 @@ import { CategoryHeader } from '@/components/CategoryHeader';
 import { Footer } from '@/components/Footer';
 
 // Helper to fetch articles client-side (easier for dynamic updates/filtering demo)
-// Helper to fetch articles client-side (easier for dynamic updates/filtering demo)
-async function getArticles(category?: string): Promise<DBArticle[] | null> {
+async function getArticles(category: string, region: string, page: number): Promise<DBArticle[] | null> {
   if (!supabase) return null;
+
+  const PAGE_SIZE = 12;
+  const from = page * PAGE_SIZE;
+  const to = from + PAGE_SIZE - 1;
 
   let query = supabase
     .from('articles')
     .select('*')
-    .order('is_featured', { ascending: false })
-    .order('created_at', { ascending: false });
+    .order('is_featured', { ascending: false }) // Featured first
+    .order('created_at', { ascending: false })  // Then newest
+    .range(from, to);
 
   if (category && category !== 'All') {
     query = query.eq('category', category);
+  }
+
+  if (region && region !== 'All') {
+    query = query.eq('region', region);
   }
 
   const { data, error } = await query;
@@ -37,41 +45,63 @@ async function getArticles(category?: string): Promise<DBArticle[] | null> {
 }
 
 import { Suspense } from 'react';
+import { Loader2 } from 'lucide-react';
 
 function HomeContent() {
   const [articles, setArticles] = useState<DBArticle[] | null>(null);
   const [filterRegion, setFilterRegion] = useState<string>('All');
   const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(0);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
 
   const searchParams = useSearchParams();
   const categoryParams = searchParams.get('category');
   const activeCategory = categoryParams || 'All';
 
+  // Initial Load (Category or Region change)
   useEffect(() => {
     async function loadArticles() {
-      // Pass activeCategory if it's not 'All'
-      const data = await getArticles(activeCategory === 'All' ? undefined : activeCategory);
+      setPage(0);
+      setHasMore(true);
+      setArticles(null); // Reset to show loading skeleton
+
+      const data = await getArticles(activeCategory, filterRegion, 0);
+
       if (data === null) {
         setError("Database connection not configured.");
       } else {
         setArticles(data);
+        if (data.length < 12) setHasMore(false);
       }
     }
     loadArticles();
-  }, [activeCategory]);
+  }, [activeCategory, filterRegion]);
+
+  const handleLoadMore = async () => {
+    if (loadingMore || !hasMore) return;
+    setLoadingMore(true);
+
+    const nextPage = page + 1;
+    const newData = await getArticles(activeCategory, filterRegion, nextPage);
+
+    if (newData) {
+      if (newData.length < 12) setHasMore(false);
+      setArticles(prev => [...(prev || []), ...newData]);
+      setPage(nextPage);
+    }
+
+    setLoadingMore(false);
+  };
 
   // Unique regions from data or hardcoded
   const regions = ['All', 'Global', 'Australia/NZ', 'North America', 'Europe', 'Asia'];
 
-  const filteredArticles = articles?.filter(a => {
-    if (filterRegion === 'All') return true;
-    // Handle case where region might be null in DB
-    const r = a.region || 'Global';
-    return r === filterRegion;
-  });
+  // Note: We no longer filter client-side, the DB does it.
+  // Except for the Headline separation which is purely visual.
 
-  const headlineArticle = filteredArticles && filteredArticles.length > 0 ? filteredArticles[0] : null;
-  const gridArticles = filteredArticles && filteredArticles.length > 1 ? filteredArticles.slice(1) : [];
+  const headlineArticle = articles && articles.length > 0 ? articles[0] : null;
+  const gridArticles = articles && articles.length > 1 ? articles.slice(1) : [];
 
   if (error) {
     return (
@@ -161,7 +191,7 @@ function HomeContent() {
                         <div className="space-y-3 mb-6 overflow-hidden">
                           {headlineArticle.summary_bullets && headlineArticle.summary_bullets.map((point, i) => (
                             <p key={i} className="text-gray-600 text-base leading-relaxed max-w-xl line-clamp-2">
-                              {(typeof point === 'string' ? point : Object.values(point || {}).join(' ')).replace(/^(The Situation|Professional Impact|Core Takeaway):/i, '').trim()}
+                              {(typeof point === 'string' ? point : Object.values(point || {}).join(' ')).replace(/^(The Situation|Professional Impact|Core Takeaway|Methodology|Findings):/i, '').trim()}
                             </p>
                           ))}
                         </div>
@@ -213,6 +243,27 @@ function HomeContent() {
                 <p>No briefings available for this region.</p>
               </div>
             )}
+
+            {/* Load More Button */}
+            <div className="mt-12 text-center">
+              {loadingMore ? (
+                <div className="flex items-center justify-center gap-2 text-stone-500 text-sm font-bold uppercase tracking-widest">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Scouting for more briefings...
+                </div>
+              ) : hasMore ? (
+                <button
+                  onClick={handleLoadMore}
+                  className="bg-white border-2 border-stone-200 text-stone-600 px-8 py-3 text-xs font-bold uppercase tracking-widest hover:border-signal-red hover:text-signal-red transition-all uppercase tracking-widest"
+                >
+                  Load More Operations
+                </button>
+              ) : (
+                <span className="text-stone-400 text-xs font-bold uppercase tracking-widest border-t border-stone-200 pt-4 px-4">
+                  End of Feed
+                </span>
+              )}
+            </div>
           </div>
 
           {/* Right Sidebar (Station Feed) */}
