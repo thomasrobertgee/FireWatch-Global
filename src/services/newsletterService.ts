@@ -113,9 +113,16 @@ function generateEmailHtml(intro: string, articles: DBArticle[]) {
                 </a>
             </div>
 
-            <p style="color: #666666; font-size: 12px; line-height: 24px; margin-top: 32px; text-align: center;">
-                © 2025 FireWatch Global. Stay Safe.
-            </p>
+            <div style="text-align: center; margin-top: 32px; border-top: 1px solid #e5e7eb; padding-top: 24px;">
+                <p style="color: #6b7280; font-size: 11px; margin-bottom: 8px;">
+                    © 2026 FireWatch Global. Stay Safe.
+                </p>
+                <p style="font-size: 11px; color: #9ca3af;">
+                    You received this email because you signed up for our daily briefing.
+                    <br>
+                    <a href="http://localhost:3000/api/unsubscribe/{{email_encoded}}" style="color: #6b7280; text-decoration: underline;">Unsubscribe</a>
+                </p>
+            </div>
         </div>
     </body>
     </html>
@@ -170,7 +177,7 @@ export async function sendShiftChangeReport() {
                 from: 'FireWatch Global <onboarding@resend.dev>',
                 to: [sub.email],
                 subject: `Shift Change Report: ${new Date().toLocaleDateString()}`,
-                html: emailHtml,
+                html: emailHtml.replace('{{email_encoded}}', encodeURIComponent(sub.email)),
             });
             console.log(`Sent to ${sub.email}:`, data);
         } catch (error) {

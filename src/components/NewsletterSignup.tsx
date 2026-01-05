@@ -68,7 +68,11 @@ export function NewsletterSignup() {
                     </button>
                 </form>
                 {msg && <p className={`mt-4 text-sm font-bold ${status === 'error' ? 'text-red-400' : 'text-emerald-400'}`}>{msg}</p>}
+
+                <p className="mt-4 text-[10px] text-stone-500 max-w-sm mx-auto leading-relaxed">
+                    By joining, you agree to our <a href="/legal/privacy" className="text-stone-400 hover:text-white underline transition-colors">Privacy Policy</a>. We use your email solely to send daily briefings and you can opt out at any time.
+                </p>
             </div>
-        </section>
+        </section >
     );
 }
