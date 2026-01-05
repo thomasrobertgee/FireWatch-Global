@@ -101,13 +101,19 @@ export default async function ArticlePage({
                                 AI Summary
                             </h3>
 
-                            <div className="space-y-4">
-                                {article.summary_bullets && article.summary_bullets.length > 0 ? (
+                            <div className="space-y-6">
+                                {article.full_summary && article.full_summary.length > 0 ? (
+                                    article.full_summary.map((para, i) => (
+                                        <p key={i} className="text-gray-700 font-sans text-lg leading-relaxed first-letter:text-4xl first-letter:font-bold first-letter:text-signal-red first-letter:mr-1 first-letter:float-left">
+                                            {para}
+                                        </p>
+                                    ))
+                                ) : article.summary_bullets && article.summary_bullets.length > 0 ? (
                                     article.summary_bullets.map((point, i) => (
                                         <div key={i} className="flex gap-4">
                                             <span className="text-signal-red font-bold text-lg leading-none mt-1">•</span>
                                             <p className="text-gray-700 font-sans text-base leading-relaxed">
-                                                {(typeof point === 'string' ? point : Object.values(point || {}).join(' ')).replace(/^(The Situation|Professional Impact|Core Takeaway):/i, '').trim()}
+                                                {(typeof point === 'string' ? point : Object.values(point || {}).join(' ')).replace(/^(The Situation|Professional Impact|Core Takeaway|Methodology|Findings):/i, '').trim()}
                                             </p>
                                         </div>
                                     ))

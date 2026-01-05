@@ -63,7 +63,7 @@ export function ArticleCard({ article }: ArticleCardProps) {
 
                     <div className="space-y-2 mb-4 flex-grow">
                         <p className="text-gray-600 text-sm leading-relaxed border-l-2 border-gray-100 pl-3 line-clamp-3">
-                            {(() => {
+                            {article.card_summary || (() => {
                                 const bullet = article.summary_bullets?.[0];
                                 if (!bullet) return 'No summary available';
                                 let content = '';
@@ -74,7 +74,7 @@ export function ArticleCard({ article }: ArticleCardProps) {
                                 } else {
                                     content = String(bullet);
                                 }
-                                return content.replace(/^(The Situation|Professional Impact|Core Takeaway):/i, '').trim();
+                                return content.replace(/^(The Situation|Professional Impact|Core Takeaway|Methodology|Findings):/i, '').trim();
                             })()}
                         </p>
                     </div>

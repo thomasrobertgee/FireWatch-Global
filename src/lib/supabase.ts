@@ -24,4 +24,6 @@ export interface DBArticle {
     image_url?: string;
     region?: string;
     tags?: string[];
+    card_summary?: string;
+    full_summary?: string[];
 }

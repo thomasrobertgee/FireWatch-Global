@@ -122,32 +122,39 @@ export async function processAndSaveArticle(article: ScrapedArticle) {
     Analyze this news article for a professional fire service portal.
     
     Article Title: ${article.title}
-Content / Snippet: ${article.content}
-Source: ${article.source}
-
-Tasks:
-1. RELEVANCE CHECK: Is this strictly about firefighting operations, professional welfare(cancer, unions, pay), innovation(tech, equipment), or major environment impact(bushfires) ?
-    - If NO(e.g. "under fire", political scandals, metaphorical usage), output "IRRELEVANT".
-       - Filter out ANY article that uses "fire" only as a metaphor.
+    Content / Snippet: ${article.content}
+    Source: ${article.source}
+    
+    Tasks:
+    1. RELEVANCE CHECK: Is this strictly about firefighting operations, professional welfare(cancer, unions, pay), innovation(tech, equipment), or major environment impact(bushfires) ?
+        - If NO(e.g. "under fire", political scandals, metaphorical usage), output "IRRELEVANT".
     
     2. CATEGORIZE: Choose one: 'Operations', 'Welfare', 'Innovation', 'Environment'.
     
-    3. REGION: Identify the region.Choose one: 'Australia/NZ', 'North America', 'Europe', 'Asia', 'Global'.
+    3. REGION: Identify the region. Choose one: 'Australia/NZ', 'North America', 'Europe', 'Asia', 'Global'.
     
-    4. TAGS: Extract 3 - 5 short keywords(e.g., 'Wildfire', 'Legislation', 'Cancer Research', 'EV Safety').
+    4. TAGS: Extract 3 - 5 short keywords.
     
-    5. SUMMARIZE: Create exactly 3 high - quality bullet points with these headers: 'The Situation', 'Professional Impact', 'Core Takeaway'.
-       - Ensure the summary is transformative and adds value, not just copy - paste.
-
+    5. SUMMARIES:
+       - card_summary: A single, punchy paragraph (max 220 chars) summarizing the core news. Factual and concise.
+       - full_summary: A comprehensive 5-paragraph summary:
+         1. The 'Who, What, Where, When'.
+         2. Details & Background.
+         3. Implications.
+         4. Analysis.
+         5. Future outlook.
+       - Include 1-2 direct quotes if valuable.
+    
     Output JSON format only:
-{
-    "relevant": boolean,
+    {
+        "relevant": boolean,
         "category": string,
-            "region": string,
-                "tags": ["tag1", "tag2", "tag3"],
-                    "summary_bullets": ["Point 1", "Point 2", "Point 3"]
-}
-`;
+        "region": string,
+        "tags": ["tag1", "tag2"],
+        "card_summary": "string",
+        "full_summary": ["Para 1", "Para 2", "Para 3", "Para 4", "Para 5"]
+    }
+    `;
 
     try {
         // Use the requested model with thinking_level parameter (mapped to generationConfig or top level if applicable)
@@ -190,11 +197,16 @@ Tasks:
             title: article.title,
             slug: slug,
             category: analysis.category,
-            summary_bullets: analysis.summary_bullets,
+            // Fallback for old systems if needed, or keeping it populated for safety
+            summary_bullets: [analysis.card_summary, ...analysis.full_summary.slice(0, 2)],
+            card_summary: analysis.card_summary,
+            full_summary: analysis.full_summary,
             source_url: article.url,
             source_name: article.source,
             full_text: article.content,
-            image_url: article.image_url // Save the image URL
+            image_url: article.image_url,
+            region: analysis.region,
+            tags: analysis.tags
         });
 
         if (error) {
